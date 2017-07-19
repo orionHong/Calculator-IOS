@@ -28,8 +28,8 @@ class CalculatorBrain {
         "e" : Operation.Constant(M_E), //M_E
         "√" : Operation.UnaryOperation(sqrt),
         "x!" : Operation.UnaryOperation{Double(factorial(Int($0)))},
-        "ln" : Operation.UnaryOperation({log($0) / log(M_E)}),
-        "log" : Operation.UnaryOperation(log),
+        "ln" : Operation.UnaryOperation(log),
+        "log" : Operation.UnaryOperation(log10),
         "cos" : Operation.UnaryOperation(cos),
         "sin" : Operation.UnaryOperation(sin),
         "tan" : Operation.UnaryOperation(tan),
@@ -53,7 +53,9 @@ class CalculatorBrain {
             case .Constant(let associatedConstantValue):
                 accumulator = associatedConstantValue
             case .UnaryOperation(let function):
+                print(accumulator)
                 accumulator = function(accumulator)
+                print(accumulator)
             case .BinaryOperation(let function):
                 executePendingOperation()
                 pending = pendingBinaryInfo(binaryFunction: function, firstOperand: accumulator, isSet: true)
