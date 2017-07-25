@@ -33,6 +33,7 @@ class CalculatorBrain {
         "cos" : Operation.UnaryOperation(cos),
         "sin" : Operation.UnaryOperation(sin),
         "tan" : Operation.UnaryOperation(tan),
+        "x2" : Operation.UnaryOperation{ $0 * $0 },
         "×" : Operation.BinaryOperation({ $0 * $1 }),
         "+" : Operation.BinaryOperation({ $0 + $1 }),
         "−" : Operation.BinaryOperation({ $0 - $1 }),
@@ -83,5 +84,5 @@ class CalculatorBrain {
         get {
             return accumulator
         }
-    } 
+    }
 }

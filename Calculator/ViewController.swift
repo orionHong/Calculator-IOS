@@ -26,7 +26,7 @@ class ViewController: UIViewController {
         }
     }
     
-    @IBAction func floatingPointDot(_ sender: UIButton) {
+    @IBAction private func floatingPointDot(_ sender: UIButton) {
         //if it is not a floating point number do the followings
         if !status.isAFloatingPointNumber {
             if status.userIsInTheMiddleOfTyping {
