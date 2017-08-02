@@ -11,41 +11,19 @@ import UIKit
 class ViewController: UIViewController {
     
     @IBOutlet private weak var display: UILabel!
-    
-    //private var userIsInTheMiddleOfTyping = false
-    private var status = enteringStatus(userIsInTheMiddleOfTyping: false, isAFloatingPointNumber: false)
+    private var userIsInTheMiddleOfTyping = false
     
     @IBAction private func touchDigit(_ sender: UIButton){
         let digit = sender.currentTitle!
-        if status.userIsInTheMiddleOfTyping{
+        if userIsInTheMiddleOfTyping{
             let textCurrentlyInDisplay = display.text!
-            display.text = textCurrentlyInDisplay + digit
-        } else {
-            display.text = digit
-            status.userIsInTheMiddleOfTyping = true
-        }
-    }
-    
-    @IBAction private func floatingPointDot(_ sender: UIButton) {
-        //if it is not a floating point number do the followings
-        if !status.isAFloatingPointNumber {
-            if status.userIsInTheMiddleOfTyping {
-                display.text! += "."
-            } else {
-                display.text! = "0."
-                status.userIsInTheMiddleOfTyping = true
+            if !(textCurrentlyInDisplay.contains(".") &&
+                digit == ".") {
+                display.text = textCurrentlyInDisplay + digit
             }
-            status.isAFloatingPointNumber = true
-        }
-    }
-    
-    private struct enteringStatus {
-        var userIsInTheMiddleOfTyping: Bool
-        var isAFloatingPointNumber: Bool
-        
-        mutating func resetAllStatusToTheBeginningStage() {
-            userIsInTheMiddleOfTyping = false
-            isAFloatingPointNumber = false
+        } else {
+            display.text = (digit == ".") ? "0." : digit
+            userIsInTheMiddleOfTyping = true
         }
     }
     
@@ -61,9 +39,9 @@ class ViewController: UIViewController {
     private var brain = CalculatorBrain()
     
     @IBAction private func performOperation(_ sender: UIButton) {
-        if status.userIsInTheMiddleOfTyping {
+        if userIsInTheMiddleOfTyping {
             brain.setOperand(operand: displayValue)
-            status.resetAllStatusToTheBeginningStage()
+            userIsInTheMiddleOfTyping = false
         }
         if let mathematicalSymbol = sender.currentTitle {
             brain.performOperation(symbol: mathematicalSymbol)
