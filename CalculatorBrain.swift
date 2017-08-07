@@ -18,9 +18,16 @@ func factorial(_ x: Int) -> Int {
 
 class CalculatorBrain {
     private var accumulator = 0.0
+    private var description = ""
+    private var resultIsPending: Bool {
+        get {
+            return pending?.isSet ?? false
+        }
+    }
     
     func setOperand(operand: Double) {
         accumulator = operand
+        description += String(operand)
     }
     
     private let operations: Dictionary<String, Operation> = [
@@ -53,16 +60,21 @@ class CalculatorBrain {
             switch operation {
             case .Constant(let associatedConstantValue):
                 accumulator = associatedConstantValue
+                description += String(accumulator)
             case .UnaryOperation(let function):
-                print(accumulator)
                 accumulator = function(accumulator)
-                print(accumulator)
+                description += String(accumulator)
             case .BinaryOperation(let function):
                 executePendingOperation()
                 pending = pendingBinaryInfo(binaryFunction: function, firstOperand: accumulator, isSet: true)
             case .Equals: executePendingOperation()
             }
         }
+    }
+    
+    private func performBinaryOperation() {
+        executePendingOperation()
+        
     }
     
     private func executePendingOperation() {

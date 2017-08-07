@@ -12,6 +12,7 @@ class ViewController: UIViewController {
     
     @IBOutlet private weak var display: UILabel!
     private var userIsInTheMiddleOfTyping = false
+    @IBOutlet weak var sequenceBoard: UILabel!
     
     @IBAction private func touchDigit(_ sender: UIButton){
         let digit = sender.currentTitle!
