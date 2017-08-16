@@ -13,6 +13,7 @@ class ViewController: UIViewController {
     @IBOutlet private weak var display: UILabel!
     private var userIsInTheMiddleOfTyping = false
     @IBOutlet weak var sequenceBoard: UILabel!
+    private var isOperationButtonJustPressed = false
     
     @IBAction private func touchDigit(_ sender: UIButton){
         let digit = sender.currentTitle!
@@ -26,6 +27,7 @@ class ViewController: UIViewController {
             display.text = (digit == ".") ? "0." : digit
             userIsInTheMiddleOfTyping = true
         }
+        isOperationButtonJustPressed = false
     }
     
     private var displayValue: Double {
@@ -33,22 +35,35 @@ class ViewController: UIViewController {
             return Double(display.text!)!
         }
         set{
-            display.text = String(newValue)
+            display.text = newValue.nonFloatingNumberForm
         }
     }
     
     private var brain = CalculatorBrain()
     
     @IBAction private func performOperation(_ sender: UIButton) {
-        if userIsInTheMiddleOfTyping {
-            brain.setOperand(operand: displayValue)
-            userIsInTheMiddleOfTyping = false
+        if !isOperationButtonJustPressed {
+            if userIsInTheMiddleOfTyping {
+                brain.setOperand(operand: displayValue)
+                userIsInTheMiddleOfTyping = false
+            }
+            else {
+                brain.setOperand(operand: 0)
+            }
+            if let mathematicalSymbol = sender.currentTitle {
+                brain.performOperation(symbol: mathematicalSymbol)
+            }
+            displayValue = brain.result
+            sequenceBoard.text = brain.operandsSequence
         }
-        if let mathematicalSymbol = sender.currentTitle {
-            brain.performOperation(symbol: mathematicalSymbol)
-        }
-        displayValue = brain.result
+        isOperationButtonJustPressed = true
     }
     
+    @IBAction func clear(_ sender: UIButton) {
+        userIsInTheMiddleOfTyping = false
+        displayValue = 0.0
+        sequenceBoard.text! = " "
+        brain.backToWhereItBegins()
+    }
 }
 

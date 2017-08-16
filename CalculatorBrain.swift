@@ -16,9 +16,18 @@ func factorial(_ x: Int) -> Int {
     return num //return the var num
 }
 
+extension Double {
+    //Help omit the floating point; 0.0 will be displayed as 0
+    var nonFloatingNumberForm: String {
+        if self == floor(self) {
+            return String(Int(self))
+        }
+        return String(self)
+    }
+}
+
 class CalculatorBrain {
-    private var accumulator = 0.0
-    private var description = ""
+    private var accumulator = (value: 0.0, description: " ")
     private var resultIsPending: Bool {
         get {
             return pending?.isSet ?? false
@@ -26,8 +35,7 @@ class CalculatorBrain {
     }
     
     func setOperand(operand: Double) {
-        accumulator = operand
-        description += String(operand)
+        accumulator = (operand, accumulator.description + operand.nonFloatingNumberForm)
     }
     
     private let operations: Dictionary<String, Operation> = [
@@ -41,10 +49,10 @@ class CalculatorBrain {
         "sin" : Operation.UnaryOperation(sin),
         "tan" : Operation.UnaryOperation(tan),
         "x2" : Operation.UnaryOperation{ $0 * $0 },
-        "×" : Operation.BinaryOperation({ $0 * $1 }),
-        "+" : Operation.BinaryOperation({ $0 + $1 }),
-        "−" : Operation.BinaryOperation({ $0 - $1 }),
-        "÷" : Operation.BinaryOperation({ $0 / $1 }),
+        "×" : Operation.BinaryOperation{ $0 * $1 },
+        "+" : Operation.BinaryOperation{ $0 + $1 },
+        "−" : Operation.BinaryOperation{ $0 - $1 },
+        "÷" : Operation.BinaryOperation{ $0 / $1 },
         "=": Operation.Equals
     ]
     
@@ -59,27 +67,40 @@ class CalculatorBrain {
         if let operation = operations[symbol] {
             switch operation {
             case .Constant(let associatedConstantValue):
-                accumulator = associatedConstantValue
-                description += String(accumulator)
+                accumulator = (associatedConstantValue,
+                               accumulator.description + "\(symbol) " )
+                executePendingOperation()
             case .UnaryOperation(let function):
-                accumulator = function(accumulator)
-                description += String(accumulator)
+                if pending == nil {
+                    if accumulator.description == " " {
+                        accumulator = (function(accumulator.value),
+                                       "\(symbol)(\(accumulator.value.nonFloatingNumberForm)) ")
+                    }
+                    else {
+                        accumulator = (function(accumulator.value),
+                                       "\(symbol)(\(accumulator.description)) ")
+                    }
+                }
+                else {
+                    accumulator = (function(accumulator.value), accumulator.description + "\(symbol)(\(accumulator.value.nonFloatingNumberForm) ")
+                }
             case .BinaryOperation(let function):
                 executePendingOperation()
-                pending = pendingBinaryInfo(binaryFunction: function, firstOperand: accumulator, isSet: true)
+                pending = pendingBinaryInfo(binaryFunction: function, firstOperand: accumulator.value, isSet: true)
+                accumulator.description += " \(symbol) "
             case .Equals: executePendingOperation()
             }
         }
     }
-    
-    private func performBinaryOperation() {
-        executePendingOperation()
-        
+    //For Clear Button
+    func backToWhereItBegins() {
+        accumulator = (value: 0.0, description: " ")
+        pending = nil
     }
     
     private func executePendingOperation() {
         if pending != nil {
-            accumulator = pending!.binaryFunction(pending!.firstOperand, accumulator)
+            accumulator.value = pending!.binaryFunction(pending!.firstOperand, accumulator.value)
             pending = nil
         }
     }
@@ -94,7 +115,18 @@ class CalculatorBrain {
     
     var result: Double {
         get {
-            return accumulator
+            return accumulator.value
+        }
+    }
+    
+    var operandsSequence: String {
+        get {
+            if resultIsPending {
+                return accumulator.description + " ..."
+            }
+            else {
+                return accumulator.description + " ="
+            }
         }
     }
 }
